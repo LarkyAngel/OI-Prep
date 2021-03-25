@@ -133,15 +133,14 @@ struct Hashing {
   }
 };
 namespace SA {
-  int buffer[N],cnt[N],tr[2][N],ts[N],sa[N],rk[N],ht[N];
+  int cnt[N],tr[2][N],ts[N],sa[N],rk[N],ht[N];
   SparseTable rmq;
   void build(char *s,int n,int m=256) {
-    rep(i,0,n) buffer[i]=s[i]-'a';
     int *x=tr[0],*y=tr[1];
     memset(cnt,0,sizeof(cnt[0])*m);
-    rep(i,0,n) cnt[buffer[i]]++;
+    rep(i,0,n) cnt[s[i]-'a']++;
     partial_sum(cnt,cnt+m,cnt);
-    rep(i,0,n) rk[i]=cnt[buffer[i]]-1;
+    rep(i,0,n) rk[i]=cnt[s[i]-'a']-1;
     for (int k=1;k<=n;k<<=1) {
       rep(i,0,n) {
         x[i]=rk[i];
@@ -162,7 +161,7 @@ namespace SA {
   void get_height(char *s,int n) {
     for (int i=0,l=0,j;i<n;i++) if (rk[i]) {
       j=sa[rk[i]-1];
-      while(i+l<n&&j+l<n&&s[i+l]==s[j+l]) l++;
+      while (i+l<n&&j+l<n&&s[i+l]==s[j+l]) l++;
       ht[rk[i]]=l; if (l) l--;
     }
   }
