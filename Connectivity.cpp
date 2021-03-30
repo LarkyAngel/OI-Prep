@@ -113,7 +113,7 @@ namespace kosaraju {
 int st[N],bel[N],cnt,top;
 bool vis[N];
 void dfs1(int u,int f) {
-  for (auto v:te[u]) if (v!=f) dfs(v);
+  for (auto v:te[u]) if (v!=f) dfs1(v);
   st[++top]=u;
 }
 void dfs2(int u) {
@@ -127,12 +127,12 @@ void dfs2(int u) {
   }
 }
 void build() {
-  rep(i,0,n) if (!vis[i]) dfs(i);
+  rep(i,0,n) if (!vis[i]) dfs1(i);
   fill(vis,vis+n,0);
   while (top) {
     int u=st[top--];
     if (!vis[u]) {
-      dfs2(v);
+      dfs2(u);
       cnt++;
     }
   }
@@ -167,7 +167,7 @@ struct TwoSAT {
   bool solve() {
     rep(i,0,n*2) if (!dfn[i]) dfs(i);
     for (int i=0;i<n*2;i+=2) {
-      if (bel[i]==bel[i^1]) return false;
+      if (bel[i]==bel[i^1]) return 0;
       sol[i]=-1;
     }
     rep(i,0,cnt) {
@@ -182,7 +182,7 @@ struct TwoSAT {
         sol[x^1]=!val;
       }
     }
-    return true;
+    return 1;
   }
   void add_clause(int x,int xv,int y,int yv) {//x=xv or y=yv
     x=x<<1|xv,y=y<<1|yv;
