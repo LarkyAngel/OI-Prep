@@ -224,40 +224,6 @@ namespace Modified {
     }
   }
 }
-struct BitVector {
-  using uint=uint32_t;
-  vector<uint> blocks,ranktable;
-  int len,blocks_len,count;
-  BitVector(int n=0) {init(n);}
-  void set(int i) { blocks[i>>5]|=1<<(i&31);}
-  bool get(int i) const { return blocks[i>>5]>>(i&31)&1;}
-  void init(int n) {
-    len=n,blocks_len=(len+31)/32+1;
-    blocks.assign(blocks_len,0);
-  }
-  void build() {
-    count=0;
-    if (len==0) return;
-    ranktable.assign(blocks_len+1,0);
-    rep(i,0,blocks_len) {
-      ranktable[i]=count;
-      count+=popcount(blocks[i]);
-    }
-    ranktable[blocks_len]=count;
-  }
-  int rank(int p) const {// number of 1s in [0, p)
-    int idx=p>>5;
-    return ranktable[idx]+popcount(blocks[idx]&(1u<<(p&31))-1);
-  }
-  int rank(bool b,int p) const { return b?rank(p):p-rank(p);}
-  int rank(bool b,int l,int r) const { return rank(b,r)-rank(b,l);}
- private:
-  static inline int popcount(uint x) {
-    x=x-((x>>1)&0x55555555);
-    x=(x&0x33333333)+((x>>2)&0x33333333);
-    return ((x+(x>>4)&0xF0F0F0F)*0x1010101)>>24;
-  }
-};
 struct wavelet_node {
   int lo,hi;
   wavelet_node *l,*r;
