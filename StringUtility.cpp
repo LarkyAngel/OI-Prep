@@ -1,4 +1,4 @@
-VI kmp(char *s,int n) {
+VI kmp(int n,char *s) {
   VI fail(n,-1);
   for (int i=1,j=-1;i<n;i++) {
     while (j>=0&&s[j+1]!=s[i]) j=fail[j];
@@ -6,7 +6,7 @@ VI kmp(char *s,int n) {
   }
   return fail;
 }
-VI manacher(char *s,int n) {
+VI manacher(int n,char *s) {
   VI u(n<<=1,0);
   for (int i=0,j=0,k;i<n;i+=k,j=max(j-k,0)) {
     while (i>=j&&i+j+1<n&&s[(i-j)>>1]==s[(i+j+1)>>1]) j++;
@@ -19,20 +19,20 @@ struct Hashing {
   ull seed;
   vector<ull> hs,pw;
   Hashing(ull _seed=9875321):seed(_seed) {}
-  void build(char *s,int n) {
+  void build(int n,char *s) {
     hs.assign(n+1,0);
     pw.assign(n+1,1);
     rep(i,1,n+1) pw[i]=seed*pw[i-1];
     per(i,0,n) hs[i]=seed*hs[i+1]+s[i];
   }
-  ull get_hash(int l,int r) {// [l, r)
+  ull get_hash(int l,int r) {
     return hs[l]-hs[r]*pw[r-l];
   }
 };
 namespace SA {
   int cnt[N],tr[2][N],ts[N],sa[N],rk[N],ht[N];
   SparseTable rmq;
-  void build(char *s,int n,int m=256) {
+  void build(int n,char *s,int m=256) {
     int *x=tr[0],*y=tr[1];
     memset(cnt,0,sizeof(cnt[0])*m);
     rep(i,0,n) cnt[s[i]-'a']++;
@@ -55,7 +55,7 @@ namespace SA {
           (x[sa[i]]!=x[sa[i+1]]||y[sa[i]]!=y[sa[i+1]]);
     }
   }
-  void get_height(char *s,int n) {
+  void get_height(int n,char *s) {
     for (int i=0,l=0,j;i<n;i++) if (rk[i]) {
       j=sa[rk[i]-1];
       while (i+l<n&&j+l<n&&s[i+l]==s[j+l]) l++;

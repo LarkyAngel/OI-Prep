@@ -194,46 +194,41 @@ struct TwoSAT {
     e[x^1].pb(x);
   }
 };
-class Hopcroft {
-public:
-  int cnt,pos[N],neg[N];
-  int gao(int n) {
-    fill(pos,pos+n,-1);
-    fill(neg,neg+n,-1);
-    for (int x=cnt=0,y;x<n;x++) rep(i,0,SZ(e[x])) {
-      if (~neg[y=e[x][i]]) continue;
-      pos[neg[y]=x]=y;
-      cnt++; break;
+struct Hungarian {
+  VI vc,is,pos,neg;
+  vector<bool> vis,mark;
+  int run(int n,int m) {
+    neg.assign(m,-1),pos.assign(n, -1);
+    mark.resize(m),vis.resize(n);
+    int ret=0;
+    rep(i,0,n) {
+      fill(all(mark),0);
+      fill(all(vis),0);
+      if (aug(i)) ret++;
     }
-    while (1) {
-      int push=0,pop=0,ok=0;
-      fill(lx,lx+n,-1);
-      fill(ly,ly+n,-1);
-      rep(x,0,n) if (pos[x]<0) lx[q[push++]=x]=0;
-      while (push!=pop) {
-        int x=q[pop++],y;
-        rep(i,0,SZ(e[x])) {
-          if (~ly[y=e[x][i]]) continue;
-          ly[y]=1+lx[x];
-          if (~neg[y]&&~lx[neg[y]]) continue;
-          if (~neg[y]) lx[q[push++]=neg[y]]=1+ly[y];
-          else ok=1;
-        }
-      }
-      if(!ok) return cnt;
-      rep(x,0,n) if(pos[x]<0&&aug(x)) cnt++;
+    fill(all(mark),0);
+    fill(all(vis),0);
+    rep(i,0,n) if (pos[i]==-1) aug(i);
+    vc.clear(),is.clear();
+    rep(i,0,n) {
+      if (!vis[i]) vc.pb(i);
+      else is.pb(i);
     }
+    rep(i,0,m) {
+      if (mark[i]) vc.pb(i);
+      else is.pb(i);
+    }
+    return ret;
   }
-private:
-  int lx[N],ly[N],q[N];
-  bool aug(int x) {
-    int c=lx[x]+1,y=lx[x]=-1;
-    rep(i,0,SZ(e[x])) if(ly[y=e[x][i]]==c) {
-      ly[y]=-1;
-      if(~neg[y]&&!aug(neg[y])) continue;
-      pos[neg[y]=x]=y;
-      return true;
+  bool aug(int u) {
+    vis[u]=1;
+    for (auto &&v:e[u]) if (!mark[v]) {
+      mark[v]=1;
+      if (neg[v]==-1||aug(neg[v])) {
+        pos[u]=v,neg[v]=u;
+        return 1;
+      }
     }
-    return false;
+    return 0;
   }
 };

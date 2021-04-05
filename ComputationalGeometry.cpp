@@ -57,7 +57,7 @@ struct ConvexHull {
         ps.pop_back();
       }
       ps.pb(u[i]);
-      if (i+1==SZ(u)) m=SZ(ps),o=-1;
+      if (i==SZ(u)-1) m=SZ(ps),o=-1;
     }
     ps.pop_back();
   }
