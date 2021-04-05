@@ -258,75 +258,54 @@ struct BitVector {
     return ((x+(x>>4)&0xF0F0F0F)*0x1010101)>>24;
   }
 };
-struct WaveletMatrix {
-  using value_t=unsigned int;
-  int height,len;
-  value_t maxval;
-  vector<BitVector> B;
-  VI mids;
-  WaveletMatrix() { init({});}
-  void init(const vector<value_t> &data) {
-    len=data.size();
-    maxval=len?*max_element(all(data)):0;
-    for (height=1;maxval>>1>>(height-1);height++);
-    B.assign(height,BitVector(len));
-    mids.resize(height);
-    vector<value_t> now(data),next(len);
-    rep(i,0,height) {
-      rep(j,0,len) mids[i]+=(now[j]>>(height-1-i)&1)==0;
-      BitVector &bv=B[i];
-      int zero=0,one=mids[i];
-      rep(j,0,len) {
-        bool b=now[j]>>(height-1-i)&1;
-        if (b) next[one++]=now[j],bv.set(j);
-        else next[zero++]=now[j];
-      }
-      bv.build();
-      next.swap(now);
-    }
+struct wavelet_node {
+  int lo,hi;
+  wavelet_node *l,*r;
+  VI b;
+  //nos are in range [x,y]
+  //array indices are [from, to)
+  wavelet_node(int *from,int *to,int x,int y) {
+    lo=x,hi=y;
+    if (lo==hi||from>=to) return;
+    int md=(lo+hi)/2;
+    auto f=[md](int x) {
+      return x<=md;
+    };
+    b.reserve(to-from+1);
+    b.pb(0);
+    for (auto it=from;it!=to;it++) b.pb(b.back()+f(*it));
+    //see how lambda function is used here  
+    auto pivot=stable_partition(from,to,f);
+    l=new wavelet_node(from,pivot,lo,md);
+    r=new wavelet_node(pivot,to,md+1,hi);
   }
-  value_t get(int p) const {
-    value_t ret=0;
-    rep(i,0,height) {
-      const BitVector &bv=B[i];
-      bool dir=bv.get(p);
-      ret=ret<<1|dir;
-      p=bv.rank(dir,p);
-      if (dir) p+=mids[i];
-    }
-    return ret;
+  //kth smallest element in [l, r]
+  int kth(int l,int r,int k) {
+    if (l>r) return 0;
+    if (lo==hi) return lo;
+    int inLeft=b[r]-b[l-1];
+    int lb=b[l-1]; //amt of nos in first (l-1) nos that go in left 
+    int rb=b[r]; //amt of nos in first (r) nos that go in left
+    if (k<=inLeft) return this->l->kth(lb+1,rb,k);
+    return this->r->kth(l-lb,r-rb,k-inLeft);
   }
-  // k-th element in position [left, right)
-  value_t quantile(int left,int right,int k) const {
-    if(k<0||right-left<=k) { return -1;}
-    value_t val=0;
-    rep(i,0,height) {
-      const BitVector &bv=B[i];
-      int count=bv.rank(true,left,right);
-      bool dir=k<count;
-      val=val<<1|(dir?1:0);
-      if(!dir) k-=count;
-      left=bv.rank(dir,left),right=bv.rank(dir,right);
-      if(dir) left+=mids[i],right+=mids[i];
-    }
-    return val;
+  //count of nos in [l, r] Less than or equal to k
+  int LTE(int l,int r,int k) {
+    if (l>r||k<lo) return 0;
+    if (hi<=k) return r-l+1;
+    int lb=b[l-1],rb=b[r];
+    return this->l->LTE(lb+1,rb,k)+this->r->LTE(l-lb,r-rb,k);
   }
-  // number of element less/greater than val in position [left, right), return the rank?
-  int rank_all(value_t val,int left,int right,int &res_lt,int &res_gt) const {
-    if(val>maxval) {
-      res_lt=right-left;
-      res_gt=0;
-      return 0;
-    }
-    res_lt=res_gt=0;
-    rep(i,0,height) {
-      const BitVector &bv=B[i];
-      bool dir=val>>(height-i-1)&1;
-      int leftcount=bv.rank(dir,left),rightcount=bv.rank(dir,right);
-      (dir?res_lt:res_gt)+=(right-left)-(rightcount-leftcount);
-      left=leftcount,right=rightcount;
-      if(dir) left+=mids[i],right+=mids[i];
-    }
-    return right-left;
+  //count of nos in [l, r] equal to k
+  int count(int l,int r,int k) {
+    if (l>r||k<lo||k>hi) return 0;
+    if (lo==hi) return r-l+1;
+    int lb=b[l-1],rb=b[r],md=(lo+hi)/2;
+    if (k<=md) return this->l->count(lb+1,rb,k);
+    return this->r->count(l-lb,r-rb,k);
+  }
+  ~wavelet_node() {
+    delete l;
+    delete r;
   }
 };
