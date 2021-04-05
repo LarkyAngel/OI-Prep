@@ -34,7 +34,6 @@ namespace SA {
   SparseTable rmq;
   void build(int n,char *s,int m=256) {
     int *x=tr[0],*y=tr[1];
-    memset(cnt,0,sizeof(cnt[0])*m);
     rep(i,0,n) cnt[s[i]-'a']++;
     partial_sum(cnt,cnt+m,cnt);
     rep(i,0,n) rk[i]=cnt[s[i]-'a']-1;
