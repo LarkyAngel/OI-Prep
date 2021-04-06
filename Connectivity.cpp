@@ -7,7 +7,7 @@ void dfs(int u) {
   for (auto v:e[u]) if (!vis[v]) p[v]=u,dfs(v);
 }
 int get(int x) { return dsu[x]==x?x:dsu[x]=get(dsu[x]);}
-void solve(int n,vector<PII> E) {
+void solve(int n,vector<PII> &E) {
   rep(i,1,n+1) dsu[i]=i;
   for (auto p:E) e[p.fi].pb(p.se),e[p.se].pb(p.fi);
   rep(i,1,n+1) if (!vis[i]) dfs(i);
@@ -18,7 +18,7 @@ void solve(int n,vector<PII> E) {
       v2[v]=1; 
       continue;
     }
-    u=get(u); v=get(v);
+    u=get(u),v=get(v);
     while (u!=v) {
       if (dep[u]>dep[v]) swap(u,v);
       v=get(v); dsu[v]=get(p[v]);
@@ -109,11 +109,11 @@ void tarjan(int u) {
     cnt++;
   }
 }
-namespace kosaraju {
 int st[N],bel[N],cnt,top;
 bool vis[N];
-void dfs1(int u,int f) {
-  for (auto v:te[u]) if (v!=f) dfs1(v);
+void dfs(int u) {
+  vis[u]=1;
+  for (auto v:te[u]) if (!vis[v]) dfs(v);
   st[++top]=u;
 }
 void dfs2(int u) {
@@ -127,8 +127,8 @@ void dfs2(int u) {
   }
 }
 void build() {
-  rep(i,0,n) if (!vis[i]) dfs1(i);
-  fill(vis,vis+n,0);
+  rep(i,0,n) if (!vis[i]) dfs(i);
+  memset(vis,0,sizeof(vis));
   while (top) {
     int u=st[top--];
     if (!vis[u]) {
@@ -136,7 +136,6 @@ void build() {
       cnt++;
     }
   }
-}
 }
 struct TwoSAT {
   VI e[N],scc[N];
@@ -167,7 +166,7 @@ struct TwoSAT {
   bool solve() {
     rep(i,0,n*2) if (!dfn[i]) dfs(i);
     for (int i=0;i<n*2;i+=2) {
-      if (bel[i]==bel[i^1]) return false;
+      if (bel[i]==bel[i^1]) return 0;
       sol[i]=-1;
     }
     rep(i,0,cnt) {
@@ -182,7 +181,7 @@ struct TwoSAT {
         sol[x^1]=!val;
       }
     }
-    return true;
+    return 1;
   }
   void add_clause(int x,int xv,int y,int yv) {//x=xv or y=yv
     x=x<<1|xv,y=y<<1|yv;
@@ -192,43 +191,5 @@ struct TwoSAT {
   void add_var(int x,int xv) {//x=xv
     x=x<<1|xv;
     e[x^1].pb(x);
-  }
-};
-struct Hungarian {
-  VI vc,is,pos,neg;
-  vector<bool> vis,mark;
-  int run(int n,int m) {
-    neg.assign(m,-1),pos.assign(n, -1);
-    mark.resize(m),vis.resize(n);
-    int ret=0;
-    rep(i,0,n) {
-      fill(all(mark),0);
-      fill(all(vis),0);
-      if (aug(i)) ret++;
-    }
-    fill(all(mark),0);
-    fill(all(vis),0);
-    rep(i,0,n) if (pos[i]==-1) aug(i);
-    vc.clear(),is.clear();
-    rep(i,0,n) {
-      if (!vis[i]) vc.pb(i);
-      else is.pb(i);
-    }
-    rep(i,0,m) {
-      if (mark[i]) vc.pb(i);
-      else is.pb(i);
-    }
-    return ret;
-  }
-  bool aug(int u) {
-    vis[u]=1;
-    for (auto &&v:e[u]) if (!mark[v]) {
-      mark[v]=1;
-      if (neg[v]==-1||aug(neg[v])) {
-        pos[u]=v,neg[v]=u;
-        return 1;
-      }
-    }
-    return 0;
   }
 };

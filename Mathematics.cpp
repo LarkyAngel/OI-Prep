@@ -122,8 +122,6 @@ vector<ll> factorize(ll n) {
 }
 bool is_prime(int n) {
   if (n<SZ(spf)) return spf[n]==n;
-  for (int i=0,sq=sqrt(n+1);pl[i]<=sq;i++) {
-    if (n%pl[i]==0) return false;
-  }
-  return true;
+  for (int i=0,sq=sqrt(n+1);pl[i]<=sq;i++) if (n%pl[i]==0) return 0;
+  return 1;
 }

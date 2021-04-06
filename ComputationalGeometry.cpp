@@ -15,14 +15,14 @@ struct Point {
   db ang() const { return atan2(y,x);}
 };
 bool on_seg(const Point &a,const Point &b,const Point &o) {
-  return sgn((a-o).det(b-o))==0&&sgn((a-o).dot(b-o))<=0;
+  return (a-o).det(b-o)==0&&(a-o).dot(b-o)<=0;
 }
 int in_polygon(const vector<Point> &p,const Point &o) {
   int cnt=0,n=SZ(p);
   rep(i,0,n) {
     const auto &a=p[i],&b=p[(i+1)%n];
     if (on_seg(a,b,o)) return 2;
-    int k=sgn((b-a).det(o-a)),d1=sgn(a.y-o.y),d2=sgn(b.y-o.y);
+    int k=(b-a).det(o-a),d1=a.y-o.y,d2=b.y-o.y;
     cnt+=(k>0&&d1<=0&&d2>0);
     cnt-=(k<0&&d2<=0&&d1>0);
   }
@@ -53,7 +53,7 @@ struct ConvexHull {
     for (int i=0,o=1,m=1;~i;i+=o) {
       while (SZ(ps)>m) {
         Point A=ps.back()-ps[SZ(ps)-2],B=ps.back()-u[i];
-        if (sgn(A.det(B))<0) break;
+        if (A.det(B)<0) break;
         ps.pop_back();
       }
       ps.pb(u[i]);

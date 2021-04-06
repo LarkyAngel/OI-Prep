@@ -23,40 +23,6 @@ namespace centroid {
     for (auto v:e[u]) if (!mark[v]) work(v,sz[v]);
   }
 }
-namespace Normal {
-  const int N=100010,P=333;
-  struct Q {
-    int l,r,id;
-    bool operator < (const Q &rhs) const {
-      return l/P==rhs.l/P?r<rhs.r:l<rhs.l;
-    }
-  } seq[N];
-  int A[N],ans[N],n,m;
-  namespace mo {
-    int u[N],now;
-    void init() {}
-    void add(int x) {}
-    void del(int x) {}
-  }
-  void run() {
-    scanf("%d%d",&n,&m);
-    for (int i=0;i<n;i++) scanf("%d",A+i);
-    for (int i=0;i<m;i++) {
-      scanf("%d%d",&seq[i].l,&seq[i].r);
-      seq[i].id =i;
-    }
-    sort(seq,seq+m);
-    mo::init();
-    for (int i=0,l=0,r=-1;i<m;i++) {
-      int L=seq[i].l,R=seq[i].r;
-      while (r<R) mo::add(A[++r]);
-      while (r>R) mo::del(A[r--]);
-      while (l<L) mo::del(A[l++]);
-      while (l>L) mo::add(A[--l]);
-      ans[seq[i].id]=mo::now;
-    }
-  }
-}
 struct wavelet_node {
   int lo,hi;
   wavelet_node *l,*r;
